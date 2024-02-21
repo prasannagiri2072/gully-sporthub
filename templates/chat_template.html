@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<a href="{% url 'chat_view' opponent_username=opponent.username %}">Chat with {{ opponent.username }}</a>
+  <h2>Chat with {{ opponent.username }}</h2>
+  
+  <div id="chatbox">
+    {% for message in messages %}
+      <p>{{ message.sender.username }}: {{ message.content }}</p>
+    {% endfor %}
+  </div>
+
+  <form id="chat-form">
+    <input type="text" id="message-input" placeholder="Type your message">
+    <button type="submit">Send</button>
+  </form>
+
+  <script>
+    // Add JavaScript for handling chat interactions and real-time updates
+  </script>
+{% endblock %}

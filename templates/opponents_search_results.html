@@ -1,0 +1,138 @@
+<!-- Inside opponents_search_results.html -->
+{% load static %}
+
+{% block content %}
+  {% include 'navigation.html' %}
+  
+
+  <div class="d-flex" id="wrapper">
+    <!-- Sidebar content... -->
+
+    <div id="page-content-wrapper">
+      <!-- Navbar content... -->
+      <!-- Add a container to display nearby teams -->
+
+      
+
+
+      <div class="container-fluid mt-2">
+        <div class="container-fluid">
+          <div class="row w-100 mx-auto">
+            <link href="{% static 'css/simple-sidebar.css' %}" rel="stylesheet">
+  {% if opponent.username %}
+    <a href="{% url 'chat_view' opponent_username=opponent.username %}">Chat with {{ opponent.username }}</a>
+{% else %}
+    <p>Opponent username is empty or undefined.</p>
+{% endif %}
+
+            {% if nearby_teams %}
+              {% for team in nearby_teams %}
+                <div class="col-md-3" style="margin: 10px 0;">
+                  <div class="card" align="center" style="border: 1px solid lightgrey; width: 200px; height: 350px;">
+                    <img class="card-img-top img-thumbnail" src="{{ team.image.url }}" style="width: 100%; height: 240px;" alt="card-img">
+                    <div class="card-body">
+                      <h6 class="card-title" style="font-size: 13px; text-align: left;">
+                        <span style="vertical-align: middle; white-space: nowrap;">Team Name: {{ team.name }}</span>
+                        <br>
+                        <span style="display: inline-block; text-align: center; vertical-align: middle;">Distance: {{ team.distance }} km</span>
+                        <br>
+                        <span style="display: inline-block; text-align: center; vertical-align: middle; font-size: 11px;">Preferred Games: {{ team.category }}</span>
+                      </h6>
+                      <p class="card-text" style="font-size: 14px;">{{ team.description }}</p>
+                      <!-- Inside opponents_search_results.html -->
+
+                      <a href="{% url 'challenge_opponent' team_captain_username=team.teamcaptain.username %}" class="btn btn-primary" style="font-size: 13px; color: white;">
+                        <i class="fas fa-handshake"></i> Challenge Opponent
+                      </a>
+                    
+
+
+                      <br><br>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="col-md-12" style="text-align: center; margin-top: 20px;">
+                No teams found
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <script>
+        function updateLocationAndFetchTeams() {
+          if ("geolocation" in navigator) {
+              navigator.geolocation.getCurrentPosition(function (position) {
+                  var latitude = position.coords.latitude;
+                  var longitude = position.coords.longitude;
+                  var location = `Latitude: ${latitude}, Longitude: ${longitude}`;
+      
+                  // Update the location in the hidden input field
+                  var locationInput = document.getElementById("id_location");
+                  locationInput.value = location;
+      
+                  // Enable the "Submit" button
+                  document.getElementById("submit-button").disabled = false;
+      
+                  // Fetch nearby teams with the updated location
+                  fetchNearbyTeams();
+              });
+          } else {
+              alert("Geolocation is not supported by your browser.");
+          }
+      }
+      function fetchNearbyTeams() {
+        // Get the updated location from the hidden input field
+        var locationInput = document.getElementById("id_location");
+        var location = locationInput.value;
+    
+        // Make an AJAX request to fetch nearby teams
+        fetch('/fetch_nearby_teams/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken(), // You may need to adjust this function based on your project setup
+            },
+            body: JSON.stringify({ location: location }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Update the UI with the fetched nearby teams
+            displayNearbyTeams(data);
+        })
+        .catch(error => console.error('Error fetching nearby teams:', error));
+    }
+    
+    function displayNearbyTeams(teams) {
+        // Assuming the 'nearby-teams-container' is a div where you want to display the teams
+        var nearbyTeamsContainer = document.getElementById("nearby-teams-container");
+        nearbyTeamsContainer.innerHTML = ""; // Clear previous content
+    
+        // Loop through the fetched teams and display them
+        teams.forEach(function (team) {
+            var teamElement = document.createElement("div");
+            teamElement.textContent = team.name; // Display team name, you can customize this
+            nearbyTeamsContainer.appendChild(teamElement);
+        });
+    }
+    
+    // Function to get CSRF token from cookies
+    function getCSRFToken() {
+        var csrfCookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('csrftoken='));
+        if (csrfCookie) {
+            return csrfCookie.split('=')[1];
+        }
+        return null;
+    }
+    
+      
+        $("#menu-toggle").click(function(e) {
+          e.preventDefault();
+          $("#wrapper").toggleClass("toggled");
+        });
+      </script>
+    </div>
+  </div>
+{% endblock %}

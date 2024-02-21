@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block main %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+
+<div class="card shadow mt-4" style="max-width: 800px;">
+    <div class="card-body">
+        <h5 class="p-2" style="border-bottom: 2px solid orange;">Create Team</h5>
+        <div class="container">
+            <form action="" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Game Type</label>
+                        <select name="category" class="form-control" required>
+                            <option value="">Prefered game</option>
+                            {% for i in category %}
+                                <option value="{{i.id}}">{{i.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+
+                    <div class="col-md-6 mb-3">
+                        <label>Team Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="Team Name">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Team Captain</label>
+                        {% if request.user.is_authenticated %}
+                            <input type="text" name="teamcaptain" class="form-control" value="{{ request.user.first_name }}" readonly>
+                        {% else %}
+                            <input type="text" name="teamcaptain" class="form-control" value="" readonly>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Contact</label>
+                        <input type="number" name="contact" class="form-control" placeholder="Contact">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Image</label>
+                        <input type="file" name="image" class="form-control">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>No Of Players</label>
+                        <input type="number" name="noofplayers" class="form-control" placeholder="No of players"></input>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <button type="button" onclick="getLocationAndSetInput()" class="btn btn-primary btn-block">Get Location</button>
+                    </div>
+
+                    <div class="col-sm-2 mb-3">
+                        <input type="text" id="id_location" name="location" style="display: none; width: 80%;" class="form-control">
+                    </div>
+                    
+                    
+
+                    <div class="col-sm-2 mb-3">
+                        <input type="submit" value="Submit" class="btn btn-warning btn-block" id="submit-button" disabled>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        margin-top: 60px;
+        margin-bottom: 20px;
+    }
+    
+
+    
+</style>
+
+
+
+<script>
+    function getLocationAndSetInput() {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var latitude = position.coords.latitude;
+                var longitude = position.coords.longitude;
+                var location = `Latitude: ${latitude}, Longitude: ${longitude}`;
+                var locationInput = document.getElementById("id_location");
+        
+                // Set the location in the hidden input field
+                locationInput.value = location;
+    
+                // Enable the "Submit" button
+                document.getElementById("submit-button").disabled = false;
+            });
+        } else {
+            alert("Geolocation is not supported by your browser.");
+        }
+    }
+
+// Example using the Geolocation API
+// Add this function to get the current location when viewing opponents
+
+
+
+</script>
+
+{% endblock %}
